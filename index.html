@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>İndirme Süresi Hesaplayıcı</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    input, select { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+    button { padding: 10px; margin-top: 10px; width: 100%; }
+    .result { margin-top: 20px; font-weight: bold; }
+    .time-input-container { display: flex; gap: 10px; }
+    .time-input-container input { width: 50%; }
+  </style>
+</head>
+<body>
+  <h2>İndirme Süresi Hesaplayıcı</h2>
+  
+  <label>Dosya Boyutu:</label>
+  <input type="number" id="fileSize" placeholder="Örn: 80">
+  <select id="fileUnit">
+    <option value="GB">GB</option>
+    <option value="MB">MB</option>
+  </select>
+
+  <label>İnternet Hızı (Mbps):</label>
+  <input type="number" id="speed" placeholder="Örn: 100">
+
+  <label>Başlangıç Saati:</label>
+  <div class="time-input-container">
+      <input type="number" id="startHour" placeholder="Saat (0-23)" min="0" max="23" value="14">
+      <input type="number" id="startMinute" placeholder="Dakika (0-59)" min="0" max="59" value="30">
+  </div>
+
+  <button onclick="calculate()">Hesapla</button>
+
+  <h2>Developed by Asus Tuf F15 Vekili(Gigant)</h2>
+
+  <div class="result" id="result"></div>
+
+<script>
+  window.onload = function() {
+      const now = new Date();
+      document.getElementById('startHour').value = now.getHours().toString().padStart(2, '0');
+      document.getElementById('startMinute').value = now.getMinutes().toString().padStart(2, '0');
+  }
+
+  function calculate() {
+    let size = parseFloat(document.getElementById('fileSize').value);
+    let unit = document.getElementById('fileUnit').value;
+    let speed = parseFloat(document.getElementById('speed').value);
+    let startHour = parseInt(document.getElementById('startHour').value);
+    let startMinute = parseInt(document.getElementById('startMinute').value);
+
+    if (isNaN(size) || isNaN(speed) || size <= 0 || speed <= 0) {
+      document.getElementById('result').innerText = "Lütfen geçerli dosya boyutu ve hız değerleri girin.";
+      return;
+    }
+    if (isNaN(startHour) || isNaN(startMinute) || startHour < 0 || startHour > 23 || startMinute < 0 || startMinute > 59) {
+      document.getElementById('result').innerText = "Lütfen geçerli bir başlangıç saati ve dakikası girin.";
+      return;
+    }
+
+    let fileMB = unit === "GB" ? size * 1024 : size;
+    let speedMBps = speed / 8;
+    let seconds = fileMB / speedMBps;
+
+    let h = Math.floor(seconds / 3600);
+    let m = Math.floor((seconds % 3600) / 60);
+    let s = Math.floor(seconds % 60);
+
+    let totalMinutes = Math.floor(seconds / 60);
+    let totalSeconds = Math.floor(seconds % 60);
+
+    let startTotalMinutes = (startHour * 60) + startMinute;
+
+    let endTotalMinutes = startTotalMinutes + totalMinutes;
+
+    let endHour = Math.floor((endTotalMinutes / 60) % 24);
+    let endMinute = endTotalMinutes % 60;
+
+    let endSecond = totalSeconds; 
+
+    if (endSecond >= 60) {
+        endMinute += Math.floor(endSecond / 60);
+        endSecond = endSecond % 60;
+    }
+    
+    if (endMinute >= 60) {
+        endHour += Math.floor(endMinute / 60);
+        endMinute = endMinute % 60;
+        endHour = endHour % 24;
+    }
+
+    let durationText = `${h} saat, ${m} dakika, ${s} saniye`;
+    
+    let endTimeText = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}:${endSecond.toString().padStart(2, '0')}`;
+    let startTimeText = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}:00`;
+
+    document.getElementById('result').innerHTML =
+      `Tahmini indirme süresi: ${durationText}<br>
+       Başlangıç Saati: ${startTimeText}<br>
+       Tahmini Bitiş Saati: ${endTimeText}`;
+  }
+  
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      calculate();
+    }
+  });
+</script>
+</body>
+</html>
